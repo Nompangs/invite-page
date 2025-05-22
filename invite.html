@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SayDo 초대</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 2rem; }
+    .button { margin-top: 2rem; padding: 1rem 2rem; font-size: 1.2rem; background: #333; color: #fff; border-radius: 8px; text-decoration: none; }
+    .small { font-size: 0.9rem; color: #777; margin-top: 1rem; }
+  </style>
+  <script>
+    function openApp() {
+      const params = new URLSearchParams(window.location.search);
+      const roomId = params.get("roomId");
+      if (roomId) {
+        window.location.href = `yourapp://open?roomId=${roomId}`;
+      }
+    }
+
+    window.onload = function () {
+      setTimeout(openApp, 300);
+    };
+  </script>
+</head>
+<body>
+  <h2>SayDo 앱으로 이동 중입니다...</h2>
+  <p>앱이 자동으로 열리지 않으면 아래 버튼을 눌러주세요.</p>
+  <a class="button" href="#" onclick="openApp()">앱 열기</a>
+
+  <div class="small">
+    앱이 설치되어 있지 않다면<br/>
+    <a href="https://yourdomain.com/download">여기에서 다운로드하세요</a>.
+  </div>
+</body>
+</html>
