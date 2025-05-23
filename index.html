@@ -93,17 +93,24 @@
   <script>
     const params = new URLSearchParams(window.location.search);
     const roomId = params.get('roomId');
-    
+  
     if (roomId) {
-      // 앱으로 이동
+      // 앱으로 자동 이동
       window.location.href = `nompangs://invite?roomId=${roomId}`;
-    
+  
       // 앱 미설치 fallback (예: 2초 후 마켓으로 이동)
       setTimeout(() => {
-        window.location.href = "https://apps.apple.com/app/id_your_app" // 또는 Google Play
+        window.location.href = "https://apps.apple.com/app/id_your_app"; // 또는 Google Play
       }, 2000);
     }
-    </script>    
+  
+    // 수동 호출용 앱 열기 버튼 함수
+    function openApp() {
+      if (roomId) {
+        window.location.href = `nompangs://invite?roomId=${roomId}`;
+      }
+    }
+  </script>  
 </head>
 <body>
   <div class="container">
