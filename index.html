@@ -99,8 +99,15 @@
       window.location.href = `nompangs://invite?roomId=${roomId}`;
   
       // 앱 미설치 fallback (예: 2초 후 마켓으로 이동)
+      let hasApp = false;
+      window.addEventListener('blur', () => {
+        hasApp = true;
+      });
+
       setTimeout(() => {
-        window.location.href = "https://apps.apple.com/app/id_your_app"; // 또는 Google Play
+        if (!hasApp) {
+          window.location.href = "https://apps.apple.com/app/id_your_app"; // 또는 Google Play
+        }
       }, 2000);
     }
   
