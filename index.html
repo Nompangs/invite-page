@@ -93,34 +93,86 @@
   <script>
     const params = new URLSearchParams(window.location.search);
     const roomId = params.get('roomId');
+    const encodedDataFromHtmlUrl = params.get('data'); // 변수명을 명확히
   
-    if (roomId) {
-      // ✅ 앱 자동 실행을 2초 후로 지연 (UX 개선)
-      setTimeout(() => {
-        window.location.href = `nompangs://invite?roomId=${roomId}`;
-      }, 2000); // 앱 실행 지연 시간 (ms)
+    console.log('[InvitePage] URL Params - roomId:', roomId, 'encodedData:', encodedDataFromHtmlUrl);
   
-      // ✅ 앱 설치 여부 판단
-      let hasApp = false;
-      window.addEventListener('blur', () => {
-        hasApp = true;
-      });
+    let appDeepLink = '';
   
-      // ✅ 앱이 설치 안 된 경우 fallback으로 앱스토어 이동 (5초 후)
-      setTimeout(() => {
-        if (!hasApp) {
-          window.location.href = "https://apps.apple.com/app/id_your_app"; // 또는 Google Play
+    if (roomId && encodedDataFromHtmlUrl) { // roomId와 encodedData가 모두 있어야 함
+      appDeepLink = `nompangs://invite?roomId=${roomId}&data=${encodedDataFromHtmlUrl}`;
+      console.log('[InvitePage] Generated appDeepLink with roomId and data:', appDeepLink);
+    } else if (roomId) { // roomId만 있는 경우
+      appDeepLink = `nompangs://invite?roomId=${roomId}`;
+      console.warn('[InvitePage] Character data (data parameter) is missing from the HTML URL. App will receive roomId only.');
+      // 사용자에게 data 누락에 대한 UI 피드백을 줄 수도 있음 (예: "캐릭터 정보가 불완전합니다...")
+    } else {
+      console.error('[InvitePage] RoomId is missing from the HTML URL. Cannot generate deep link.');
+      // 사용자에게 roomId 누락에 대한 UI 피드백
+      document.addEventListener('DOMContentLoaded', () => {
+        const container = document.querySelector('.container');
+        if (container) {
+          container.innerHTML = `<h2>오류</h2><p>초대 정보(초대 코드)가 올바르지 않습니다. QR 코드를 다시 확인해주세요.</p>`;
         }
-      }, 5000); // fallback까지 대기 시간 (ms)
+      });
+    }
+  
+    if (appDeepLink) {
+      const autoOpenDelay = 2000; // 자동 앱 실행 지연 시간 (ms)
+      const fallbackDelay = 5000; // 앱 스토어 이동까지 대기 시간 (ms)
+      let appOpenedByBlur = false;
+      let fallbackTimeoutId;
+  
+      const launchApp = () => {
+        console.log(`[InvitePage] Attempting to launch app via deep link: ${appDeepLink}`);
+        window.location.href = appDeepLink;
+      };
+  
+      const handleBlur = () => {
+        appOpenedByBlur = true;
+        console.log('[InvitePage] Blur event detected, assuming app opened.');
+        window.removeEventListener('blur', handleBlur);
+        if (fallbackTimeoutId) {
+          clearTimeout(fallbackTimeoutId);
+        }
+      };
+      
+      window.addEventListener('blur', handleBlur);
+  
+      // 자동 실행
+      setTimeout(launchApp, autoOpenDelay);
+  
+      // 앱 미설치 시 fallback
+      fallbackTimeoutId = setTimeout(() => {
+        window.removeEventListener('blur', handleBlur);
+        if (!appOpenedByBlur) {
+          console.log('[InvitePage] App not detected by blur, redirecting to store/download page.');
+          // TODO: 실제 앱스토어/플레이스토어 ID 또는 다운로드 페이지 URL로 변경
+          const downloadLinkElement = document.querySelector('.small a');
+          if (downloadLinkElement && downloadLinkElement.href && downloadLinkElement.href !== '#') {
+            window.location.href = downloadLinkElement.href;
+          } else {
+            // 기본 앱스토어 링크 (예시)
+            // if (/(iPhone|iPad|iPod)/i.test(navigator.userAgent)) {
+            //   window.location.href = "https://apps.apple.com/app/your-app-id";
+            // } else if (/(Android)/i.test(navigator.userAgent)) {
+            //   window.location.href = "market://details?id=your.package.name";
+            // }
+            console.warn('[InvitePage] Download link not properly configured.');
+          }
+        }
+      }, fallbackDelay);
     }
   
     // 수동 앱 열기 버튼 클릭 시 호출
     function openApp() {
-      if (roomId) {
-        window.location.href = `nompangs://invite?roomId=${roomId}`;
+      if (appDeepLink) {
+        launchApp();
+      } else {
+        alert('초대 정보가 올바르지 않아 앱을 열 수 없습니다.');
       }
     }
-  </script>  
+  </script>
 </head>
 <body>
   <div class="container">
