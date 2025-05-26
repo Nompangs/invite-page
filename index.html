@@ -93,22 +93,15 @@
   <script>
     const params = new URLSearchParams(window.location.search);
     const roomId = params.get('roomId');
-    const encodedDataFromHtmlUrl = params.get('data'); // 변수명을 명확히
-  
-    console.log('[InvitePage] URL Params - roomId:', roomId, 'encodedData:', encodedDataFromHtmlUrl);
+    const encodedDataFromHtmlUrl = params.get('data');
   
     let appDeepLink = '';
   
-    if (roomId && encodedDataFromHtmlUrl) { // roomId와 encodedData가 모두 있어야 함
+    if (roomId && encodedDataFromHtmlUrl) {
       appDeepLink = `nompangs://invite?roomId=${roomId}&data=${encodedDataFromHtmlUrl}`;
-      console.log('[InvitePage] Generated appDeepLink with roomId and data:', appDeepLink);
-    } else if (roomId) { // roomId만 있는 경우
+    } else if (roomId) {
       appDeepLink = `nompangs://invite?roomId=${roomId}`;
-      console.warn('[InvitePage] Character data (data parameter) is missing from the HTML URL. App will receive roomId only.');
-      // 사용자에게 data 누락에 대한 UI 피드백을 줄 수도 있음 (예: "캐릭터 정보가 불완전합니다...")
     } else {
-      console.error('[InvitePage] RoomId is missing from the HTML URL. Cannot generate deep link.');
-      // 사용자에게 roomId 누락에 대한 UI 피드백
       document.addEventListener('DOMContentLoaded', () => {
         const container = document.querySelector('.container');
         if (container) {
@@ -118,19 +111,17 @@
     }
   
     if (appDeepLink) {
-      const autoOpenDelay = 2000; // 자동 앱 실행 지연 시간 (ms)
-      const fallbackDelay = 5000; // 앱 스토어 이동까지 대기 시간 (ms)
+      const autoOpenDelay = 2000;
+      const fallbackDelay = 5000;
       let appOpenedByBlur = false;
       let fallbackTimeoutId;
   
       const launchApp = () => {
-        console.log(`[InvitePage] Attempting to launch app via deep link: ${appDeepLink}`);
         window.location.href = appDeepLink;
       };
   
       const handleBlur = () => {
         appOpenedByBlur = true;
-        console.log('[InvitePage] Blur event detected, assuming app opened.');
         window.removeEventListener('blur', handleBlur);
         if (fallbackTimeoutId) {
           clearTimeout(fallbackTimeoutId);
@@ -139,32 +130,19 @@
       
       window.addEventListener('blur', handleBlur);
   
-      // 자동 실행
       setTimeout(launchApp, autoOpenDelay);
   
-      // 앱 미설치 시 fallback
       fallbackTimeoutId = setTimeout(() => {
         window.removeEventListener('blur', handleBlur);
         if (!appOpenedByBlur) {
-          console.log('[InvitePage] App not detected by blur, redirecting to store/download page.');
-          // TODO: 실제 앱스토어/플레이스토어 ID 또는 다운로드 페이지 URL로 변경
           const downloadLinkElement = document.querySelector('.small a');
           if (downloadLinkElement && downloadLinkElement.href && downloadLinkElement.href !== '#') {
             window.location.href = downloadLinkElement.href;
-          } else {
-            // 기본 앱스토어 링크 (예시)
-            // if (/(iPhone|iPad|iPod)/i.test(navigator.userAgent)) {
-            //   window.location.href = "https://apps.apple.com/app/your-app-id";
-            // } else if (/(Android)/i.test(navigator.userAgent)) {
-            //   window.location.href = "market://details?id=your.package.name";
-            // }
-            console.warn('[InvitePage] Download link not properly configured.');
           }
         }
       }, fallbackDelay);
     }
   
-    // 수동 앱 열기 버튼 클릭 시 호출
     function openApp() {
       if (appDeepLink) {
         launchApp();
