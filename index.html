@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SayDo 초대</title>
+  <title>모멘티 초대</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     body { 
@@ -111,15 +111,20 @@
     }
   
     if (appDeepLink) {
-      const autoOpenDelay = 2000;
-      const fallbackDelay = 5000;
+      // 앱 실행 관련 타이밍 설정
+      const autoOpenDelay = 2000; // 자동 앱 실행 시도까지 대기 시간 (2초)
+      const fallbackDelay = 5000; // 앱 미설치 시 앱스토어 이동까지 대기 시간 (5초)
       let appOpenedByBlur = false;
       let fallbackTimeoutId;
   
+      // window.location.href를 사용하여 커스텀 URL 스킴(nompangs://)을 호출하는 방식으로 앱 실행
+      // 이는 iOS/Android에서 가장 일반적으로 사용되는 딥링크 방식
       const launchApp = () => {
         window.location.href = appDeepLink;
       };
-  
+    
+      // 앱이 성공적으로 열리면 blur 이벤트가 발생
+      // 이를 통해 앱이 실제로 열렸는지 감지
       const handleBlur = () => {
         appOpenedByBlur = true;
         window.removeEventListener('blur', handleBlur);
@@ -129,9 +134,11 @@
       };
       
       window.addEventListener('blur', handleBlur);
-  
+    
+      // 자동으로 앱 실행 시도
       setTimeout(launchApp, autoOpenDelay);
-  
+    
+      // 앱이 열리지 않은 경우(blur 이벤트가 발생하지 않은 경우) 앱스토어로 리다이렉트
       fallbackTimeoutId = setTimeout(() => {
         window.removeEventListener('blur', handleBlur);
         if (!appOpenedByBlur) {
@@ -154,7 +161,7 @@
 </head>
 <body>
   <div class="container">
-    <h2>SayDo 앱으로 이동 중입니다...</h2>
+    <h2>모멘티 앱으로 이동 중입니다...</h2>
     <p>앱이 자동으로 열리지 않으면 아래 버튼을 눌러주세요.</p>
     <a class="button" href="#" onclick="openApp()">앱 열기</a>
 
